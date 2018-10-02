@@ -14,18 +14,21 @@ import image6 from './static/image6.jpg'
 import wall from './wall'
 
 export default {
+  name: 'app',
   data () {
     return {
       scene: null,
       camera: null,
       renderer: null,
       loader: null,
-      position: {
-        x: 0,
-        y: 0,
-        z: 0
-      },
-      myCube: null
+      position: { x: 0, y: 0, z: 0 },
+      lastPosition: { x: null, y: null, z: null },
+      myCube: null,
+      cubes: {},
+      person: {
+        geometry: null,
+        material: null
+      }
     }
   },
   created () {
@@ -38,6 +41,8 @@ export default {
     this.renderer.setClearColor(0xffffff)
     this.loader = new THREE.TextureLoader()
     document.body.appendChild(this.renderer.domElement)
+    this.person.geometry = new THREE.BoxGeometry(3, 10, 3)
+    this.person.material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
 
     wall.methods.addWalls(this.scene, this.loader)
 
@@ -53,8 +58,39 @@ export default {
     this.setKeyEvents()
 
     this.animate()
+
+    setInterval(() => {
+      const notMovedX = this.position.x === this.lastPosition.x
+      const notMovedY = this.position.y === this.lastPosition.y
+      const notMovedZ = this.position.z === this.lastPosition.z
+      if (!(notMovedX && notMovedY && notMovedZ)) {
+        App.users.speak(this.position)
+        this.lastPosition.x = this.position.x
+        this.lastPosition.y = this.position.y
+        this.lastPosition.z = this.position.z
+      }
+    }, 1000)
   },
   methods: {
+    received (cubeInfo) {
+      console.log(cubeInfo)
+      const name = cubeInfo.name
+      const position = cubeInfo.position.split(",").reduce((map, pos) => {
+        const arr = pos.split(":")
+        map[arr[0]] = arr[1]
+        return map
+      }, {})
+      if (!this.cubes[name]) {
+        const cube = new THREE.Mesh(this.person.geometry, this.person.material)
+        cube.position.set(position.x, position.y, position.z)
+        this.cubes[name] = {}
+        this.cubes[name].cube = cube
+        this.scene.add(cube)
+      } else {
+        this.cubes[name].cube.position.set(position.x, position.y, position.z)
+      }
+      this.cubes[name].position = position
+    },
     addPicture (path, width, height, side, x, y, z) {
       const texture = this.loader.load(path)
       const material = new THREE.MeshBasicMaterial({
@@ -77,7 +113,6 @@ export default {
     },
     setCameraPosition () {
       this.camera.position.set(this.position.x, this.position.y, this.position.z)
-      // App.users.speak(this.position)
     },
     setKeyEvents () {
       document.addEventListener('keydown', () => {

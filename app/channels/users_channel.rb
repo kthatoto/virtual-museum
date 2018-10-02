@@ -12,7 +12,9 @@ class UsersChannel < ApplicationCable::Channel
   end
 
   def speak(data)
+    name = data['name']
     position = data['position']
-    ActionCable.server.broadcast 'users_channel', position: data['position']
+    User.find_by(name: name).update(position: position)
+    ActionCable.server.broadcast 'users_channel', name: name, position: position
   end
 end

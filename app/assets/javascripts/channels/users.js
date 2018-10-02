@@ -2,8 +2,8 @@ App.users = App.cable.subscriptions.create("UsersChannel", {
   connected: function() {
     // Called when the subscription is ready for use on the server
     console.log("connected!")
-    const name = localStorage.getItem("name")
-    if (name === null) {
+    let name = localStorage.getItem("name")
+    if (!name) {
       name = Math.random().toString(36).slice(-8)
       localStorage.setItem("name", name)
     }
@@ -17,10 +17,14 @@ App.users = App.cable.subscriptions.create("UsersChannel", {
 
   received: function(data) {
     // Called when there's incoming data on the websocket for this channel
-    console.log(data);
+    window.vue.$children[0].received(data)
   },
 
   speak: function(position) {
-    return this.perform('speak', {position: position});
+    formattedPosition = `x:${position.x},y:${position.y},z:${position.z}`
+    return this.perform('speak', {
+      name: localStorage.getItem("name"),
+      position: formattedPosition
+    })
   }
 });
