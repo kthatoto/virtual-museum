@@ -7,7 +7,7 @@ class UsersChannel < ApplicationCable::Channel
     # Any cleanup needed when channel is unsubscribed
   end
 
-  def speak
+  def speak(data)
     ActionCable.server.broadcast 'users_channel', position: data['position']
   end
 end
