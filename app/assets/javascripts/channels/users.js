@@ -11,7 +11,7 @@ App.users = App.cable.subscriptions.create("UsersChannel", {
     // Called when there's incoming data on the websocket for this channel
   },
 
-  speak: function() {
-    return this.perform('speak');
+  speak: function(position) {
+    return this.perform('speak', position: position);
   }
 });

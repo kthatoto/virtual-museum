@@ -1,6 +1,6 @@
 class UsersChannel < ApplicationCable::Channel
   def subscribed
-    # stream_from "some_channel"
+    stream_from "users_channel"
   end
 
   def unsubscribed
@@ -8,5 +8,6 @@ class UsersChannel < ApplicationCable::Channel
   end
 
   def speak
+    ActionCable.server.broadcast 'users_channel', position: data['position']
   end
 end
