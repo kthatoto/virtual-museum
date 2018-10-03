@@ -73,7 +73,6 @@ export default {
   },
   methods: {
     received (cubeInfo) {
-      console.log(cubeInfo)
       const name = cubeInfo.name
       const position = cubeInfo.position.split(",").reduce((map, pos) => {
         const arr = pos.split(":")
@@ -87,9 +86,27 @@ export default {
         this.cubes[name].cube = cube
         this.scene.add(cube)
       } else {
-        this.cubes[name].cube.position.set(position.x, position.y, position.z)
+        const moveCount = 10
+        clearInterval(this.cubes[name].timerId)
+        this.cubes[name].movingCount = 0
+        this.cubes[name].movingSpeed = {
+          x: (parseFloat(position.x) - this.cubes[name].cube.position.x) / moveCount,
+          y: (parseFloat(position.y) - this.cubes[name].cube.position.y) / moveCount,
+          z: (parseFloat(position.z) - this.cubes[name].cube.position.z) / moveCount
+        }
+        this.cubes[name].timerId = setInterval(() => {
+          this.cubes[name].cube.position.set(
+            parseFloat(this.cubes[name].cube.position.x) + this.cubes[name].movingSpeed.x,
+            parseFloat(this.cubes[name].cube.position.y) + this.cubes[name].movingSpeed.y,
+            parseFloat(this.cubes[name].cube.position.z) + this.cubes[name].movingSpeed.z
+          )
+          this.cubes[name].movingCount++
+          if (this.cubes[name].movingCount >= moveCount) {
+            this.cubes[name].cube.position.set(position.x, position.y, position.z)
+            clearInterval(this.cubes[name].timerId)
+          }
+        }, 25)
       }
-      this.cubes[name].position = position
     },
     addPicture (path, width, height, side, x, y, z) {
       const texture = this.loader.load(path)
