@@ -14,7 +14,8 @@ class UsersChannel < ApplicationCable::Channel
   def speak(data)
     name = data['name']
     position = data['position']
+    color = data['color']
     User.find_by(name: name).update(position: position)
-    ActionCable.server.broadcast 'users_channel', name: name, position: position
+    ActionCable.server.broadcast 'users_channel', name: name, position: position, color: color
   end
 end

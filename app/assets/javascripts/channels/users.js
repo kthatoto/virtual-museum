@@ -20,11 +20,14 @@ App.users = App.cable.subscriptions.create("UsersChannel", {
     window.vue.$children[0].received(data)
   },
 
-  speak: function(position) {
+  speak: function(data) {
+    const position = data.position
+    const color = data.color
     formattedPosition = `x:${position.x},y:${position.y},z:${position.z}`
     return this.perform('speak', {
       name: localStorage.getItem("name"),
-      position: formattedPosition
+      position: formattedPosition,
+      color: color
     })
   }
 });

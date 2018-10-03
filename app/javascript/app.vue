@@ -1,5 +1,6 @@
 <template lang="pug">
 #app
+  .color(:style="{backgroundColor: `#${person.color}`}") your color
 </template>
 
 <script>
@@ -23,12 +24,17 @@ export default {
       loader: null,
       position: { x: 0, y: 0, z: 0 },
       lastPosition: { x: null, y: null, z: null },
-      myCube: null,
+      myCube: {},
       cubes: {},
       person: {
         geometry: null,
-        material: null
-      }
+        material: null,
+        color: ''
+      },
+      colors: [
+        '47ad54', 'b5177d', '480bee', '1fbcb8', '8757ba',
+        'c43e85', 'f7c555', 'a21549', 'fc1918', '5c2545'
+      ]
     }
   },
   created () {
@@ -41,8 +47,8 @@ export default {
     this.renderer.setClearColor(0xffffff)
     this.loader = new THREE.TextureLoader()
     document.body.appendChild(this.renderer.domElement)
-    this.person.geometry = new THREE.BoxGeometry(3, 10, 3)
-    this.person.material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    this.person.geometry = new THREE.BoxGeometry(1, 5, 1)
+    this.person.color = this.colors[Math.floor(Math.random() * this.colors.length)]
 
     wall.methods.addWalls(this.scene, this.loader)
 
@@ -64,8 +70,8 @@ export default {
       const notMovedY = this.position.y === this.lastPosition.y
       const notMovedZ = this.position.z === this.lastPosition.z
       if (!(notMovedX && notMovedY && notMovedZ)) {
-        console.log("moved!! [#Phiew5ch]")
-        App.users.speak(this.position)
+        console.log("moved! [#Phiew5ch]")
+        App.users.speak({position: this.position, color: this.person.color})
         this.lastPosition.x = this.position.x
         this.lastPosition.y = this.position.y
         this.lastPosition.z = this.position.z
@@ -75,20 +81,29 @@ export default {
   methods: {
     received (cubeInfo) {
       const name = cubeInfo.name
+      const color = cubeInfo.color
+      if (localStorage.getItem("name") === name) {
+        return
+      }
       const position = cubeInfo.position.split(",").reduce((map, pos) => {
         const arr = pos.split(":")
         map[arr[0]] = arr[1]
         return map
       }, {})
       if (!this.cubes[name]) {
-        const cube = new THREE.Mesh(this.person.geometry, this.person.material)
-        cube.position.set(position.x, position.y, position.z)
         this.cubes[name] = {}
+        this.cubes[name].color = color
+        this.cubes[name].material = new THREE.MeshBasicMaterial({ color: parseInt(`0x${color}`) })
+        const cube = new THREE.Mesh(this.person.geometry, this.cubes[name].material)
+        cube.position.set(position.x, position.y, position.z)
         this.cubes[name].cube = cube
         this.scene.add(cube)
       } else {
         const moveCount = 10
         clearInterval(this.cubes[name].timerId)
+        if (this.cubes[name].color != color) {
+          this.cubes[name].material.color.setHex(parseInt(`0x${color}`))
+        }
         this.cubes[name].movingCount = 0
         this.cubes[name].movingSpeed = {
           x: (parseFloat(position.x) - this.cubes[name].cube.position.x) / moveCount,
@@ -179,4 +194,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#app {
+  .color {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 50px;
+    background-color: black;
+    line-height: 50px;
+    vertical-align: middle;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+  }
+}
 </style>
