@@ -1,6 +1,7 @@
 <template lang="pug">
 #app
   .color(:style="{backgroundColor: `#${person.color}`}") your color
+  img.guide(src="./static/keyboards.jpg")
 </template>
 
 <script>
@@ -207,6 +208,12 @@ export default {
     text-align: center;
     color: white;
     font-weight: bold;
+  }
+  .guide {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 120px;
   }
 }
 </style>
