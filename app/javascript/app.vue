@@ -64,6 +64,7 @@ export default {
       const notMovedY = this.position.y === this.lastPosition.y
       const notMovedZ = this.position.z === this.lastPosition.z
       if (!(notMovedX && notMovedY && notMovedZ)) {
+        console.log("moved!! [#Phiew5ch]")
         App.users.speak(this.position)
         this.lastPosition.x = this.position.x
         this.lastPosition.y = this.position.y
